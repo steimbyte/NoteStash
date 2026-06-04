@@ -2,7 +2,8 @@
  * Config Module - Settings, theme, and accent color management
  */
 
-export const createConfig = ({ bridge, eventBus, chromeApi })   => {
+export const createConfig = ({ bridge, eventBus, chromeApi, utils })   => {
+  const logger = (...args) => { if (utils?.isDebug?.()) (utils?.nsLog || console.log)(...args); };
   const defaults = {
     minImageSize: 75,
     maxImagesPerClip: 10,

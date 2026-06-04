@@ -5,6 +5,7 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    minify: false,
     lib: {
       entry: resolve(__dirname, 'content/modules/index.mjs'),
       name: 'NoteStash',
