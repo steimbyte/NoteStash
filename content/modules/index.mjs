@@ -23,6 +23,11 @@ import { createLinkExtractor } from './content/link-extractor.mjs';
 import { createFilterModes } from './content/filter-modes.mjs';
 import { createXPathResolver } from './content/xpath-resolver.mjs';
 
+// Design system + lucide icons
+import { TOKENS_CSS } from '../styles/tokens.css.js';
+import { BASE_CSS } from '../styles/base.css.js';
+import { lucide, LUCIDE_NAMES } from './ui/lucide-icons.mjs';
+
 import { createImageDetector } from './images/detector.mjs';
 import { createImageProcessor } from './images/processor.mjs';
 
@@ -235,7 +240,7 @@ async function init() {
 
     await createMainUI();
 
-    injectGlobalStyles();
+    injectGlobalStyles(registry);
 
   setupKeyboardShortcuts();
 
@@ -522,55 +527,16 @@ function showHtmlViewer(cachedData) {
 /**
  * Inject global CSS styles for NoteStash elements (D23)
  */
-function injectGlobalStyles() {
+function injectGlobalStyles(registry) {
   if (document.getElementById('notestash-global-styles')) return;
-  
   const style = document.createElement('style');
   style.id = 'notestash-global-styles';
-  style.textContent = `
-    /* Custom scrollbars for NoteStash elements */
-    [id^="notestash-"] ::-webkit-scrollbar,
-    [id^="cleaner-"] ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    [id^="notestash-"] ::-webkit-scrollbar-track,
-    [id^="cleaner-"] ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 3px;
-    }
-    [id^="notestash-"] ::-webkit-scrollbar-thumb,
-    [id^="cleaner-"] ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-    }
-    [id^="notestash-"] ::-webkit-scrollbar-thumb:hover,
-    [id^="cleaner-"] ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.35);
-    }
-
-    /* Toast animations */
-    @keyframes notestash-toast-in {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes notestash-toast-out {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
-    }
-
-    /* Recording pulse */
-    @keyframes notestash-recording-glow {
-      0%, 100% { box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); }
-      50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.6); }
-    }
-
-    /* Spin animation */
-    @keyframes notestash-spin {
-      to { transform: rotate(360deg); }
-    }
-  `;
+  style.textContent = TOKENS_CSS + '\n' + BASE_CSS;
   document.head.appendChild(style);
+  if (registry) {
+    registry.register('lucide', { icon: lucide, names: LUCIDE_NAMES });
+  }
+  if (utils?.isDebug?.()) (utils?.nsLog || console.log)('[NoteStash] Design system + lucide icons injected');
 }
 
 /**
