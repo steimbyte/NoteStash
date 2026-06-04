@@ -212,4 +212,4 @@ export const {
   validateContent
 } = CONTENT_FORMAT;
 
-console.log('[ContentFormat] Module loaded');
+
