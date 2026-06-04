@@ -70,9 +70,11 @@ async function init() {
     await bridge.init({ eventBus, chromeApi });
     console.log('[NoteStash] Bridge initialized');
 
+    const utils = createUtils({ bridge, eventBus, chromeApi });
     const config = createConfig({ bridge, eventBus, chromeApi, utils });
-    const state = createState({ bridge, eventBus, chromeApi, config });
-    const utils = createUtils({ bridge, eventBus, chromeApi, config, state });
+    const state = createState({ bridge, eventBus, chromeApi, config, utils });
+    utils.config = config;
+    utils.state = state;
     
     await Promise.all([
       config.init(),
