@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Dark red background with depth -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9a0000;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#7a0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5a0000;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Glassmorphism highlight -->
+    <linearGradient id="glassHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+    </linearGradient>
+    
+    <!-- Strong white glow for eye -->
+    <filter id="strongGlow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="blur1"/>
+      <feGaussianBlur stdDeviation="8" result="blur2"/>
+      <feGaussianBlur stdDeviation="12" result="blur3"/>
+      <feMerge>
+        <feMergeNode in="blur3"/>
+        <feMergeNode in="blur2"/>
+        <feMergeNode in="blur1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Soft shadow for icon depth -->
+    <filter id="iconShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  
+  <!-- Main rounded rectangle background -->
+  <rect x="8" y="8" width="112" height="112" rx="24" ry="24" 
+        fill="url(#bgGradient)" 
+        filter="url(#iconShadow)"/>
+  
+  <!-- Top glassmorphism shine -->
+  <rect x="8" y="8" width="112" height="56" rx="24" ry="24" 
+        fill="url(#glassHighlight)"/>
+  
+  <!-- Symmetrical glowing white eye in center -->
+  <g transform="translate(64, 64)" filter="url(#strongGlow)">
+    <!-- Outer eye shape - perfect symmetry -->
+    <ellipse cx="0" cy="0" rx="32" ry="22" 
+             fill="none" 
+             stroke="#ffffff" 
+             stroke-width="3"
+             stroke-linecap="round"/>
+    
+    <!-- Inner eye fill -->
+    <ellipse cx="0" cy="0" rx="28" ry="18" 
+             fill="rgba(255,255,255,0.1)"/>
+    
+    <!-- Pupil - pure white circle -->
+    <circle cx="0" cy="0" r="10" fill="#ffffff"/>
+    
+    <!-- Primary highlight -->
+    <circle cx="-3" cy="-3" r="3" fill="#ffffff" opacity="0.9"/>
+  </g>
+</svg>

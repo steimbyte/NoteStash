@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "NoteStash",
+  "version": "10.0.0",
+  "description": "📦 Stash web content as Markdown notes. AI-powered cleaning, sessions, and smart clipping.",
+  "minimum_chrome_version": "102",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "permissions": ["downloads", "storage", "unlimitedStorage", "tabs", "activeTab", "clipboardRead", "clipboardWrite", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "NoteStash Settings",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "commands": {
+    "clip-page": {
+      "suggested_key": { "default": "Alt+C" },
+      "description": "Stash current page"
+    }
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["jszip.min.js", "dist/content.iife.js"],
+    "run_at": "document_end",
+    "all_frames": false
+  }],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  }
+}
