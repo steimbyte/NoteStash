@@ -331,7 +331,7 @@ export const createFloatingButtons = ({ bridge, eventBus, chromeApi, config, sta
     if (!mainButton) return;
     
     if (loading) {
-      mainButton.innerHTML = '<span style="animation: notestash-spin 1s linear infinite;">âŸ³</span>';
+      mainButton.textContent = '\u27F3';
       mainButton.style.cursor = 'wait';
     } else {
       mainButton.innerHTML = 'âœ‚ï¸';

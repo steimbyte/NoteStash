@@ -1,9 +1,9 @@
-﻿/**
+/**
  * Arc Menu Module
  * Radial menu with floating arc buttons
- * 
+ *
  * @module content/modules/ui/arc-menu
- * @version 1.0.0
+ * @version 1.2.0
  * @license ISC
  */
 
@@ -15,11 +15,11 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
   let isExpanded = false;
 
   const MENU_ITEMS = [
-    { id: 'view', emoji: 'ðŸ‘ï¸', label: 'View', angle: 0 },
-    { id: 'newSession', emoji: 'ðŸ“', label: 'New', angle: -45 },
-    { id: 'record', emoji: 'ðŸ”´', label: 'Rec', angle: -75 },
-    { id: 'download', emoji: 'ðŸ’¾', label: 'Save', angle: 45 },
-    { id: 'settings', emoji: 'âš™ï¸', label: 'Set', angle: 75 }
+    { id: 'view', label: 'View', angle: 0 },
+    { id: 'newSession', label: 'New', angle: -45 },
+    { id: 'record', label: 'Rec', angle: -75 },
+    { id: 'download', label: 'Save', angle: 45 },
+    { id: 'settings', label: 'Set', angle: 75 }
   ];
 
   /**
@@ -36,10 +36,10 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
     MENU_ITEMS.forEach(item => {
       const arrow = createArrow(item.angle, accentRgb);
       const button = createButton(item, accentRgb, theme, handlers[item.id]);
-      
+
       arrows.push(arrow);
       buttons.push({ ...item, element: button, arrow });
-      
+
       container.appendChild(arrow);
       container.appendChild(button);
     });
@@ -56,9 +56,6 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
 
   /**
    * Create arrow SVG pointing from main button
-   * @param {number} angle - Angle in degrees
-   * @param {string} accentRgb - Accent color
-   * @returns {SVGElement}
    */
   function createArrow(angle, accentRgb) {
     const arrowSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -66,9 +63,9 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
     arrowSvg.setAttribute('height', '50');
     arrowSvg.setAttribute('viewBox', '0 0 24 50');
     arrowSvg.setAttribute('class', 'notestash-floating-arrow');
-    
+
     const rotation = -angle;
-    
+
     arrowSvg.style.cssText = `
       position: absolute;
       left: 50%;
@@ -80,99 +77,120 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
       pointer-events: none;
       z-index: 2147483645;
     `;
-    
-    arrowSvg.innerHTML = `
-      <defs>
-        <linearGradient id="arrowGrad${angle}" x1="0%" y1="100%" x2="0%" y2="0%">
-          <stop offset="0%" style="stop-color:rgba(${accentRgb}, 1);stop-opacity:1" />
-          <stop offset="60%" style="stop-color:rgba(${accentRgb}, 0.5);stop-opacity:1" />
-          <stop offset="100%" style="stop-color:rgba(${accentRgb}, 0.1);stop-opacity:1" />
-        </linearGradient>
-      </defs>
-      <path d="M12 46 L12 6 M5 13 L12 4 L19 13" 
-            stroke="url(#arrowGrad${angle})" 
-            stroke-width="2.5" 
-            stroke-linecap="round" 
-            stroke-linejoin="round"
-            fill="none"
-            filter="drop-shadow(0 2px 3px rgba(${accentRgb}, 0.4))" />
-    `;
-    
+
+    const ns = 'http://www.w3.org/2000/svg';
+    const defs = document.createElementNS(ns, 'defs');
+    const grad = document.createElementNS(ns, 'linearGradient');
+    grad.setAttribute('id', `arrowGrad${angle}`);
+    grad.setAttribute('x1', '0%');
+    grad.setAttribute('y1', '100%');
+    grad.setAttribute('x2', '0%');
+    grad.setAttribute('y2', '0%');
+    [{ off: '0%', color: `rgba(${accentRgb}, 1)`, op: '1' },
+     { off: '60%', color: `rgba(${accentRgb}, 0.5)`, op: '1' },
+     { off: '100%', color: `rgba(${accentRgb}, 0.1)`, op: '1' }].forEach(s => {
+      const stop = document.createElementNS(ns, 'stop');
+      stop.setAttribute('offset', s.off);
+      stop.setAttribute('style', `stop-color:${s.color};stop-opacity:${s.op}`);
+      grad.appendChild(stop);
+    });
+    defs.appendChild(grad);
+    arrowSvg.appendChild(defs);
+
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', 'M12 46 L12 6 M5 13 L12 4 L19 13');
+    path.setAttribute('stroke', `url(#arrowGrad${angle})`);
+    path.setAttribute('stroke-width', '2.5');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('fill', 'none');
+    path.setAttribute('filter', `drop-shadow(0 2px 3px rgba(${accentRgb}, 0.4))`);
+    arrowSvg.appendChild(path);
+
     if (registry) {
       registry.register('arrows', arrowSvg);
     }
-    
+
     return arrowSvg;
   }
 
   /**
-   * Create arc button
-   * @param {Object} item - Menu item config
-   * @param {string} accentRgb - Accent color
-   * @param {Object} theme - Theme object
-   * @param {Function} clickHandler - Click handler
-   * @returns {HTMLElement}
+   * Create arc button — text-based, accessible, clearly visible
    */
   function createButton(item, accentRgb, theme, clickHandler) {
     const btn = document.createElement('div');
     btn.className = 'notestash-floating-btn';
     btn.dataset.id = item.id;
-    btn.innerHTML = '';
-    const emojiSpan = document.createElement('span');
-    emojiSpan.style.cssText = 'font-size:16px;margin-right:6px;';
-    emojiSpan.textContent = item.emoji || '';
-    const labelSpan = document.createElement('span');
-    labelSpan.style.cssText = 'font-size:12px;font-weight:500;white-space:nowrap;';
-    labelSpan.textContent = item.label || '';
-    btn.appendChild(emojiSpan);
-    btn.appendChild(labelSpan);
-    
+    btn.setAttribute('role', 'button');
+    btn.setAttribute('aria-label', item.label);
+    btn.setAttribute('tabindex', '0');
+
     const radius = 130;
     const rad = (item.angle * Math.PI) / 180;
     const x = Math.sin(rad) * radius;
     const y = Math.cos(rad) * radius;
-    
+
     Object.assign(btn.style, {
       position: 'absolute',
       left: `calc(50% + ${x}px)`,
       bottom: `${70 + y}px`,
-      padding: '8px 14px',
-      background: `rgba(${accentRgb}, 0.15)`,
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
-      color: theme.text || '#e2e8f0',
-      border: `1px solid rgba(${accentRgb}, 0.4)`,
-      boxShadow: `0 4px 16px rgba(${accentRgb}, 0.2), 0 2px 8px rgba(0,0,0,0.1)`,
-      transition: 'opacity 0.3s ease',
-      borderRadius: '20px',
-      fontSize: '12px',
+      transform: 'translate(-50%, 0) scale(1)',
+      transformOrigin: 'center center',
+      padding: '10px 18px',
+      background: `rgba(${accentRgb}, 0.95)`,
+      color: '#ffffff',
+      border: `2px solid rgba(${accentRgb}, 1)`,
+      boxShadow: `0 6px 20px rgba(${accentRgb}, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2)`,
+      transition: 'opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease',
+      borderRadius: '22px',
+      fontSize: '14px',
+      fontWeight: '600',
       cursor: 'pointer',
       display: 'flex',
       alignItems: 'center',
+      justifyContent: 'center',
+      gap: '6px',
+      whiteSpace: 'nowrap',
       opacity: '0',
       pointerEvents: 'none',
       zIndex: '2147483646',
-      transform: 'translate(-50%, 0) scale(1)',
-      transformOrigin: 'center center'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      minWidth: '90px'
     });
-    
+
+    const labelSpan = document.createElement('span');
+    labelSpan.textContent = item.label;
+    btn.appendChild(labelSpan);
+
     btn.addEventListener('mouseenter', () => {
+      btn.style.transform = 'translate(-50%, 0) scale(1.08)';
+      btn.style.boxShadow = `0 10px 28px rgba(${accentRgb}, 0.7), 0 4px 12px rgba(0, 0, 0, 0.3)`;
       eventBus?.emit('arc-menu:hover');
     });
-    
+
     btn.addEventListener('mouseleave', () => {
+      btn.style.transform = 'translate(-50%, 0) scale(1)';
+      btn.style.boxShadow = `0 6px 20px rgba(${accentRgb}, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2)`;
       eventBus?.emit('arc-menu:leave');
     });
-    
+
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
       eventBus?.emit('arc-menu:click', { id: item.id });
     });
-    
+
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        e.stopPropagation();
+        eventBus?.emit('arc-menu:click', { id: item.id });
+      }
+    });
+
     if (registry) {
       registry.register('floatingBtns', btn);
     }
-    
+
     return btn;
   }
 
@@ -188,11 +206,11 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
         element.style.opacity = '1';
         element.style.pointerEvents = 'auto';
       }
-      if (arrow) arrow.style.opacity = '1';
+      if (arrow) arrow.style.opacity = '0.8';
     });
 
     eventBus?.emit('arc-menu:expanded');
-    logger('[ArcMenu] Expanded');
+    logger('[ArcMenu] Expanded', buttons.length, 'buttons');
   }
 
   /**
@@ -218,18 +236,9 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
    * Toggle expand/collapse
    */
   function toggle() {
-    if (isExpanded) {
-      collapse();
-    } else {
-      expand();
-    }
+    if (isExpanded) collapse(); else expand();
   }
 
-  /**
-   * Update button state
-   * @param {string} id - Button ID
-   * @param {Object} updates - Style updates
-   */
   function updateButton(id, updates) {
     const button = buttons.find(b => b.id === id);
     if (button && button.element) {
@@ -237,11 +246,6 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
     }
   }
 
-  /**
-   * Set button content
-   * @param {string} id - Button ID
-   * @param {string} html - New HTML content
-   */
   function setButtonContent(id, html) {
     const button = buttons.find(b => b.id === id);
     if (button && button.element) {
@@ -249,27 +253,15 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
     }
   }
 
-  /**
-   * Get button element
-   * @param {string} id - Button ID
-   * @returns {HTMLElement|null}
-   */
   function getButton(id) {
     const button = buttons.find(b => b.id === id);
     return button ? button.element : null;
   }
 
-  /**
-   * Check if menu is expanded
-   * @returns {boolean}
-   */
   function isMenuExpanded() {
     return isExpanded;
   }
 
-  /**
-   * Destroy the menu
-   */
   function destroy() {
     buttons.forEach(({ element, arrow }) => {
       element?.remove();
@@ -297,6 +289,7 @@ export const createArcMenu = ({ bridge, eventBus, chromeApi, config, state, util
     setButtonContent,
     getButton,
     isMenuExpanded,
-    destroy
+    destroy,
+    MENU_ITEMS
   };
 };
